@@ -2,16 +2,18 @@
 #include <ESP8266WiFi.h>
 #include <LiquidCrystal_I2C.h>
 #include <ArduinoJson.h>
+#include <String.h>
 #ifndef STASSID
 #define STASSID "Kalathiparambil"
 #define PASSWORD "Abin@1999"
 #define HOST "covid-19-tracker-abjs.vercel.app"
-#define HOST_FINGERPRINT  "1fa81791acb6d1b94ea2241d6461daad88157c5e"
+#define HOST_FINGERPRINT "1fa81791acb6d1b94ea2241d6461daad88157c5e"
 #endif
 WiFiClientSecure client;
 const char *ssid = STASSID;
 const char *password = PASSWORD;
-int Cases, Deaths, Recovered ,Active;
+String outputLineTow;
+int Cases, Deaths, Recovered, Active;
 int lcdColumns = 16;
 int lcdRows = 2;
 LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);
@@ -29,7 +31,7 @@ void makeHTTPRequest()
   yield();
 
   client.print(F("GET "));
-  client.print("/api/india"); 
+  client.print("/api/india");
   client.println(F(" HTTP/1.1"));
 
   //Headers
@@ -86,17 +88,26 @@ void makeHTTPRequest()
   if (!error)
   {
     Cases = doc["Cases"];
-    Deaths = doc["Deaths"]; 
+    Deaths = doc["Deaths"];
     Recovered = doc["Recovered"];
-    Active = doc["Active"]; 
+    Active = doc["Active"];
+    outputLineTow[0] = '\0';
+    outputLineTow += "Deaths :";
+    outputLineTow += Deaths;
+    outputLineTow += " Recovered :";
+    outputLineTow += Recovered;
+    outputLineTow += " Active :";
+    outputLineTow += Active;
+    outputLineTow += " " + outputLineTow;
     Serial.print("Cases: ");
     Serial.println(Cases);
-    Serial.print("Deaths: ");
+    Serial.print(" Deaths: ");
     Serial.println(Deaths);
-    Serial.print("Recovered: ");
+    Serial.print(" Recovered: ");
     Serial.println(Recovered);
-    Serial.print("Active: ");
+    Serial.print(" Active: ");
     Serial.println(Active);
+    Serial.println(outputLineTow);
   }
   else
   {
@@ -105,7 +116,26 @@ void makeHTTPRequest()
     return;
   }
 }
-
+void scrollText(int row, String message, int delayTime, int lcdColumns)
+{
+  for (int i = 0; i < lcdColumns; i++)
+  {
+    message = " " + message;
+  }
+  message = message + " ";
+  for (int pos = 0; pos < message.length(); pos++)
+  {
+    lcd.setCursor(0, row);
+    lcd.print(message.substring(pos, pos + lcdColumns));
+    delay(delayTime);
+  }
+  for (int pos = 0; pos < message.length(); pos++)
+  {
+    lcd.setCursor(0, row);
+    lcd.print(message.substring(pos, pos + lcdColumns));
+    delay(delayTime);
+  }
+}
 void setup()
 {
 
@@ -143,8 +173,8 @@ void setup()
     lcd.setCursor(1, 1);
     lcd.print("Viral Science");
   }
-  client.setFingerprint(HOST_FINGERPRINT);
-
+  // client.setFingerprint(HOST_FINGERPRINT);
+  client.setInsecure();
 }
 
 void loop()
@@ -167,13 +197,6 @@ void loop()
   lcd.setCursor(7, 0);
   lcd.print(Cases);
   lcd.setCursor(0, 1);
-  lcd.print("D:");
-  lcd.setCursor(2, 1);
-  lcd.print(Deaths);
-  lcd.setCursor(8, 1);
-  lcd.print("R:");
-  lcd.setCursor(10, 1);
-  lcd.print(Recovered);
-  delay(60000);
-
+  scrollText(1, outputLineTow, 700, lcdColumns);
+  delay(20000);
 }
