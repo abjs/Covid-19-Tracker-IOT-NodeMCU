@@ -2,7 +2,6 @@
 #include <ESP8266WiFi.h>
 #include <LiquidCrystal_I2C.h>
 #include <ArduinoJson.h>
-#include <String.h>
 #ifndef STASSID
 #define STASSID "Kalathiparambil"
 #define PASSWORD "Abin@1999"
