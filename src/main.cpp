@@ -197,6 +197,6 @@ void loop()
   lcd.setCursor(7, 0);
   lcd.print(Cases);
   lcd.setCursor(0, 1);
-  scrollText(1, outputLineTow, 700, lcdColumns);
+  scrollText(1, outputLineTow, 750, lcdColumns);
   delay(20000);
 }
