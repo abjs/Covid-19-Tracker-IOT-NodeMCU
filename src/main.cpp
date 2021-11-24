@@ -3,8 +3,13 @@
 #include <LiquidCrystal_I2C.h>
 #include <ArduinoJson.h>
 #ifndef STASSID
-#define STASSID "Kalathiparambil"
-#define PASSWORD "Abin@1999"
+// #define STASSID "Kalathiparambil"
+// #define PASSWORD "Abin@1999"
+#define LED LED_BUILTIN
+#define H HIGH
+#define L LOW
+#define STASSID "abjs"
+#define PASSWORD "abinjoseph"
 #define HOST "covid-19-tracker-abjs.vercel.app"
 #define HOST_FINGERPRINT "1fa81791acb6d1b94ea2241d6461daad88157c5e"
 #endif
@@ -137,7 +142,8 @@ void scrollText(int row, String message, int delayTime, int lcdColumns)
 }
 void setup()
 {
-
+  delay(2000);
+  pinMode(LED_BUILTIN, OUTPUT);
   lcd.init();
   lcd.backlight();
   lcd.setCursor(0, 0);
@@ -151,11 +157,13 @@ void setup()
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
   {
-    delay(500);
+    delay(1000);
+    digitalWrite(LED_BUILTIN, H);
     Serial.print(".");
   }
   if (WiFi.status() == WL_CONNECTED)
   {
+    digitalWrite(LED_BUILTIN, L);
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("WIFI CONNECTED");
@@ -165,7 +173,7 @@ void setup()
     lcd.print(WiFi.localIP());
     Serial.println("Connected to the WiFi network");
     Serial.println(WiFi.localIP());
-    delay(5000);
+    delay(2000);
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Covid-19 INDIA");
@@ -178,16 +186,22 @@ void setup()
 
 void loop()
 {
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    digitalWrite(LED_BUILTIN, L);
+  }
   while (WiFi.status() != WL_CONNECTED)
   {
+    digitalWrite(LED_BUILTIN, H);
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("WIFI DISCONNECTED");
     WiFi.disconnect();
-    delay(5000);
     WiFi.begin(ssid, password);
+    delay(3000);
+    digitalWrite(LED_BUILTIN, L);
+    delay(2000);
     Serial.println("Reconnecting to WiFi..");
-    delay(10000);
   }
   makeHTTPRequest();
   lcd.clear();
